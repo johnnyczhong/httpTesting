@@ -109,38 +109,40 @@ def main():
     # modification name: {}\n'.format(e, scm.modName)
     rl.writeToLog(msg)
 
-  htf.pushServerConfigModification(scm, rl)
+  # loop0: iterate over mdtTagComboList
+  for i in range(len(scm.mdtTagComboList)):
+    htf.pushServerConfigModification(scm, rl)
 
-  # loop1: iterate over hosts list
-  for ho in configFile.hosts: # host list
-    cHeader = {}
-    cHeader['Hosts'] = ho
+    # loop1: iterate over hosts list
+    for ho in configFile.hosts: # host list
+      cHeader = {}
+      cHeader['Hosts'] = ho
 
-    # loop2: iterate through urls list
-    for u in configFile.urls:
+      # loop2: iterate through urls list
+      for u in configFile.urls:
 
-      # loop3: iterate through objects hash
-      for obj, methods in configFile.objects.items(): # object/endpoint hash
+        # loop3: iterate through objects hash
+        for obj, methods in configFile.objects.items(): # object/endpoint hash
 
-        for method in methods: # loop4: iterate through methods list
+          for method in methods: # loop4: iterate through methods list
 
-          # loop5: iterate over header subsets/combinations
-          for hs in headerSubsets: # header subset list
-            headersHash = htf.constructHeadersHash(hs, configFile.headers)
+            # loop5: iterate over header subsets/combinations
+            for hs in headerSubsets: # header subset list
+              headersHash = htf.constructHeadersHash(hs, configFile.headers)
 
-            # construct request object from hosts, objects, headers
-            req = requests.Request(method, url = u + obj, headers = {**headersHash, **cHeader}, timeout = to)
-            session = requests.Session()
+              # construct request object from hosts, objects, headers
+              req = requests.Request(method, url = u + obj, headers = {**headersHash, **cHeader}, timeout = to)
+              session = requests.Session()
 
-            try:
-              resp = session.send(req)
-              logMsg = rl.logging(resp) # optional argument to preset encoding
-              rl.writeToLog(logMsg)
-            except Exception as e:
-              exceptionMsg = '# server config filename: {0} \n\
-              # url: {1} \n\
-              # exception msg: {2} \n'.format(scm.origPath, req.url, e)
-              rl.writeToLog(exceptionMsg)
+              try:
+                resp = session.send(req)
+                logMsg = rl.logging(resp) # optional argument to preset encoding
+                rl.writeToLog(logMsg)
+              except Exception as e:
+                exceptionMsg = '# server config filename: {0} \n\
+                # url: {1} \n\
+                # exception msg: {2} \n'.format(scm.origPath, req.url, e)
+                rl.writeToLog(exceptionMsg)
 
 
   # reset the original from the backup

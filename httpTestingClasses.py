@@ -41,7 +41,7 @@ class ServerConfigModifier:
       
   def replaceSearchTag(self):
     addTag = self.mdtTagComboList[self.mdtTagIndex]
-    
+
     with open(self.origPath) as infile:
       file = infile.read()
     
@@ -55,7 +55,7 @@ class ServerConfigModifier:
   # search for placeholder tag and replace with newTag
   def changePlaceholderTag(self):
     addTag = self.mdtTagComboList[self.mdtTagIndex]
-    
+
     with open(self.origPath, 'r') as infile:
       file = infile.read()
     
