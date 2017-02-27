@@ -122,7 +122,7 @@ def main():
       # loop3: iterate through objects hash
       for obj, methods in configFile.objects.items(): # object/endpoint hash
 
-        for method in methods: # loop4: iterate through the various methods to be tested
+        for method in methods: # loop4: iterate through methods list
 
           # loop5: iterate over header subsets/combinations
           for hs in headerSubsets: # header subset list
