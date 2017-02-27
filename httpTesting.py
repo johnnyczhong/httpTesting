@@ -97,11 +97,6 @@ def main():
   
   # create resultsLogger object, set outfile/verbose
   rl = htc.ResultsLogger(args.v, args.o)
-  if args.o:
-    rl.outfile = args.o
-  if args.v:
-    rl.verbose = args.v
-    
     
   # make configMod objects, currently automatically makes copy.
   # in future, might want to allow option to make copy
