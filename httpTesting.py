@@ -129,9 +129,10 @@ def main():
             # loop5: iterate over header subsets/combinations
             for hs in headerSubsets: # header subset list
               headersHash = htf.constructHeadersHash(hs, configFile.headers)
+              allHeaders = htf.merge_dicts(headersHash, cHeader)
 
               # construct request object from hosts, objects, headers
-              req = requests.Request(method, url = u + obj, headers = {**headersHash, **cHeader}, timeout = to)
+              req = requests.Request(method, url = u + obj, headers = allHeaders, timeout = to)
               session = requests.Session()
 
               try:

@@ -4,6 +4,16 @@ import itertools
 # functions #
 #############
 
+# merge dictionaries
+# purpose: for backwards compatability with python3.4 and older
+#   takes multiple dictionaries with unique keys
+# returns: a single dict that comprises the input dicts
+def merge_dicts(*dict_args):
+  outDict = {}
+  for d in dict_args:
+    outDict.update(d)
+  return outDict
+
 # purpose: send request to server
 # returns: Requests Response Object
 def sendRequestObject(r):
