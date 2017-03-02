@@ -42,7 +42,7 @@ class ServerConfigModifier:
   def replaceSearchTag(self):
     addTag = self.mdtTagComboList[self.mdtTagIndex]
 
-    with open(self.origPath) as infile:
+    with open(self.backupPath) as infile:
       file = infile.read()
     
     file.replace(self.placeholderTag, addTag)
@@ -54,9 +54,13 @@ class ServerConfigModifier:
       
   # search for placeholder tag and replace with newTag
   def changePlaceholderTag(self):
-    addTag = self.mdtTagComboList[self.mdtTagIndex]
+    addTag = ''
+    subsets = self.mdtTagComboList[self.mdtTagIndex]
 
-    with open(self.origPath, 'r') as infile:
+    for s in subsets:
+      addTag += s
+
+    with open(self.backupPath, 'r') as infile:
       file = infile.read()
     
     file = file.replace(self.placeholderTag, addTag + self.placeholderTag)
@@ -110,5 +114,19 @@ class ResultsLogger:
     else:
       msg += '# Code: {0}\n\
       # Text: {1}\n'.format(resp.status_code, resp.text)
+    
+    return msg
+
+
+  def logRequest(self, req):
+    msg = ''
+
+    if self.verbose:
+      msg += 'URL: {0}\n\
+      # Headers: {1}\n\
+      # Method: {2}\n'.format(req.url, req.headers, req.method)
+    else:
+      msg += '# URL: {0}\n\
+      # Headers: {1}\n'.format(req.url, req.headers)
     
     return msg
