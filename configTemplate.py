@@ -2,17 +2,18 @@
 
 serverConfigOrig = 'path/to/config/file.txt'
 serverConfigDest = 'path/to/dest/file.txt'
-action = 'add' # add only for now
-searchTag = '</example>'
 
-hosts = ['localhost'] 
+# "add" will add the tag in front of the search tag.
+# "replace" will replaced the string with your tag
+action = 'add' # add or replace
+searchTag = '</example>'
 
 mdtTags = {
 	'tagName' : ['on', 'off']
 }
 
 urls = [
-	'example.com'
+	'http://example.com/'
 ]
 
 objects = {
@@ -21,4 +22,8 @@ objects = {
 
 headers = {
 	'header-name' : 'value' 
+}
+
+constantHeaders = {
+	'cheader-name' : 'value'
 }
