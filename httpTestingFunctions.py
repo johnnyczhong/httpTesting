@@ -42,7 +42,7 @@ def generateHeaderCombinations(headersHash, minSize, maxSize):
   headerCombinationsList = []
   
   for i in range(minSize, maxSize+1):
-    for subset in itertools.combinations(headersList):
+    for subset in itertools.combinations(headersList, i):
       headerCombinationsList.append(subset)
   
   return headerCombinationsList
