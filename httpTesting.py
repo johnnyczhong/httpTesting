@@ -51,43 +51,40 @@ def main():
   type_args = {
     '-o' : {'long' : '--output',
             'type' : str,
-            'nargs' : 1,
             'help' : 'File to save test result logs to.'
           },
     '-e' : {'long' : '--extension',
             'type' : str,
-            'nargs' : 1,
             'help' : 'Custom Extension for temp copy config file.'
       },
     '-to' : {'long' : '--timeout',
              'type' : int,
-             'nargs' : 1,
              'help' : 'Manually set timeout for requests (time for bytes to be received). Default is 5s.'
       }
     }
   
   parser = argparse.ArgumentParser(description='Parse options for comboTester.py.')
-  parser.add_argument('configFile', type = str, nargs = 1, required = True, help = 'The input test config file to use for generating test combos.')
+  parser.add_argument('configFile', type = str, required = True, help = 'The input test config file to use for generating test combos.')
     
-  for hash in bool_args.keys():
-    parser.add_argument(hash, hash['long'], action = hash['action'], help = hash['help'])
+  for short, hash in bool_args.items():
+    parser.add_argument(short, hash['long'], action = hash['action'], help = hash['help'])
 
-  for hash in type_args.keys():
-    parser.add_argument(hash, hash['long'], nargs = hash['nargs'], help = hash['help'])
+  for short, hash in type_args.items():
+    parser.add_argument(short, hash['long'], help = hash['help'])
     
   args = parser.parse_args()
   
-  configFile = SourceFileLoader('configFile', args.configFile[0]).load_module() # imports config file
+  configFile = SourceFileLoader('configFile', args.configFile).load_module() # imports config file
   # access configFile resources via configFile.blah
   
   # set loop for test combinations with no headers
-  min = 1 if args.nh else 0
+  min = 0 if args.no_headers else 1
   
   # set extension
-  ext = args.e if args.e else '.bkp' 
+  ext = args.extension if args.extension else '.bkp' 
   
   # set timeout for returning bytes
-  to = args.to if args.to else 5
+  to = args.timeout if args.timeout else 5
     
   # get list of header subset combinations
   headerSubsets = htf.generateHeaderCombinations(configFile.headers, min, len(configFile.headers.keys()))
@@ -96,7 +93,7 @@ def main():
   metadataSubsets = htf.generateMetadataCombinations(configFile.mdtTags)
   
   # create resultsLogger object, set outfile/verbose
-  rl = htc.ResultsLogger(args.v, args.o)
+  rl = htc.ResultsLogger(args.verbose, args.output)
     
   # make configMod objects, currently automatically makes copy.
   # in future, might want to allow option to make copy
@@ -113,41 +110,38 @@ def main():
   for i in range(len(scm.mdtTagComboList)):
     htf.pushServerConfigModification(scm, rl)
 
-    # loop1: iterate over hosts list
-    for ho in configFile.hosts: # host list
-      cHeader = {}
-      cHeader['Hosts'] = ho
+    # loop1: iterate through urls list
+    for u in configFile.urls:
 
-      # loop2: iterate through urls list
-      for u in configFile.urls:
+      # loop2: iterate through objects hash
+      for obj, methods in configFile.objects.items(): # object/endpoint hash
 
-        # loop3: iterate through objects hash
-        for obj, methods in configFile.objects.items(): # object/endpoint hash
+        for method in methods: # loop3: iterate through methods list
 
-          for method in methods: # loop4: iterate through methods list
+          # loop4: iterate over header subsets/combinations
+          for hs in headerSubsets: # header subset list
+            headersHash = htf.constructHeadersHash(hs, configFile.headers)
+            allHeaders = htf.merge_dicts(headersHash, configFile.constantHeaders)
 
-            # loop5: iterate over header subsets/combinations
-            for hs in headerSubsets: # header subset list
-              headersHash = htf.constructHeadersHash(hs, configFile.headers)
-              allHeaders = htf.merge_dicts(headersHash, cHeader)
+            # construct request object from hosts, objects, headers
+            req = requests.Request(method, url = u + obj, headers = allHeaders)
+            session = requests.Session()
+            prepped = session.prepare_request(req)
 
-              # construct request object from hosts, objects, headers
-              req = requests.Request(method, url = u + obj, headers = allHeaders, timeout = to)
-              session = requests.Session()
+            if args.verbose:
+              rl.logRequest(req)
 
-              try:
-                resp = session.send(req)
-                logMsg = rl.logging(resp) # optional argument to preset encoding
-                rl.writeToLog(logMsg)
-              except Exception as e:
-                exceptionMsg = '# server config filename: {0} \n\
-                # url: {1} \n\
-                # exception msg: {2} \n'.format(scm.origPath, req.url, e)
-                rl.writeToLog(exceptionMsg)
+            try:
+              resp = session.send(prepped, timeout = to)
+              logMsg = rl.logging(resp) # optional argument to preset encoding
+              rl.writeToLog(logMsg)
+            except Exception as e:
+              exceptionMsg = '# server config filename: {0} \n\
+              # url: {1} \n\
+              # exception msg: {2} \n'.format(scm.origPath, req.url, e)
+              rl.writeToLog(exceptionMsg)
 
-
-  # reset the original from the backup
-  scm.resetOriginal()
+    scm.resetOriginal()
                                      
 # if __name__ == '__main__':
 #   main()
