@@ -3,10 +3,9 @@ A tool to test requests against various combinations of server configurations an
 
 # Workflow:
 - 1. iterate over mdtTag subsets
-- 2. iterate over host list
-- 3. build Request object from url, object, method, and headers
-- 4. make request
-- 5. log response
+- 2. build Request object from url, object, method, and headers
+- 3. make request
+- 4. log response
 
 
 # future features:
